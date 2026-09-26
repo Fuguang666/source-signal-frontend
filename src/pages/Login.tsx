@@ -126,7 +126,7 @@ const LoginPage: React.FC = () => {
             <Form
               layout="vertical"
               onFinish={handleLogin}
-              initialValues={{ username: 'admin', password: 'admin123' }}
+              autoComplete="off"
               size="large"
             >
               <Form.Item
@@ -134,14 +134,14 @@ const LoginPage: React.FC = () => {
                 label="用户名"
                 rules={[{ required: true, message: '请输入用户名' }]}
               >
-                <Input prefix={<UserOutlined style={{ color: '#94A3B8' }} />} placeholder="请输入用户名" />
+                <Input prefix={<UserOutlined style={{ color: '#94A3B8' }} />} placeholder="请输入用户名" autoComplete="off" />
               </Form.Item>
               <Form.Item
                 name="password"
                 label="密码"
                 rules={[{ required: true, message: '请输入密码' }]}
               >
-                <Input.Password prefix={<LockOutlined style={{ color: '#94A3B8' }} />} placeholder="请输入密码" />
+                <Input.Password prefix={<LockOutlined style={{ color: '#94A3B8' }} />} placeholder="请输入密码" autoComplete="new-password" />
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit" loading={loading} block style={{ height: 44, fontSize: 15, fontWeight: 600 }}>
@@ -156,6 +156,7 @@ const LoginPage: React.FC = () => {
             <Form
               layout="vertical"
               onFinish={handleRegister}
+              autoComplete="off"
               size="large"
             >
               <Form.Item
@@ -167,14 +168,14 @@ const LoginPage: React.FC = () => {
                   { max: 20, message: '用户名最多 20 个字符' },
                 ]}
               >
-                <Input prefix={<UserOutlined style={{ color: '#94A3B8' }} />} placeholder="设置用户名（用于登录）" />
+                <Input prefix={<UserOutlined style={{ color: '#94A3B8' }} />} placeholder="设置用户名（用于登录）" autoComplete="off" />
               </Form.Item>
               <Form.Item
                 name="email"
                 label="邮箱（选填）"
                 rules={[{ type: 'email', message: '请输入有效的邮箱地址' }]}
               >
-                <Input prefix={<MailOutlined style={{ color: '#94A3B8' }} />} placeholder="用于找回密码（选填）" />
+                <Input prefix={<MailOutlined style={{ color: '#94A3B8' }} />} placeholder="用于找回密码（选填）" autoComplete="off" />
               </Form.Item>
               <Form.Item
                 name="password"
@@ -184,7 +185,7 @@ const LoginPage: React.FC = () => {
                   { min: 6, message: '密码至少 6 个字符' },
                 ]}
               >
-                <Input.Password prefix={<LockOutlined style={{ color: '#94A3B8' }} />} placeholder="设置密码（至少 6 位）" />
+                <Input.Password prefix={<LockOutlined style={{ color: '#94A3B8' }} />} placeholder="设置密码（至少 6 位）" autoComplete="new-password" />
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit" loading={loading} block style={{ height: 44, fontSize: 15, fontWeight: 600 }}>
