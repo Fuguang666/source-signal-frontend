@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Spin, message, Modal } from 'antd';
+import { useTranslation } from 'react-i18next';
+import { Button, Form, Input, Spin, message, Modal, Select } from 'antd';
 import { accountApi, subscriptionApi } from '@/api';
 import type { User, UserSubscriptionConfig, Subscription } from '@/types';
 import { useAuthStore } from '@/store/auth';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const ALL_CATEGORIES = ['宠物用品', '户外露营', '3C数码', '家居收纳', '服装配饰', '跨境电商物流', '其他'];
 const ALL_REGIONS = ['北美', '欧洲', '东南亚', '澳洲', '其他'];
@@ -15,6 +17,7 @@ const LockIcon = () => (
 );
 
 const SettingsPage: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const { user, setUser } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<User | null>(null);
@@ -56,7 +59,7 @@ const SettingsPage: React.FC = () => {
       });
       setProfile(updated);
       setUser(updated);
-      message.success('资料已保存');
+      message.success(t('settings.profileSaved'));
     } finally {
       setSavingProfile(false);
     }
@@ -66,7 +69,7 @@ const SettingsPage: React.FC = () => {
     const newCats = myCategories.filter((c) => c !== cat);
     accountApi.updateCategories(newCats).then((cfg) => {
       setConfig(cfg);
-      message.success('品类配置已更新');
+      message.success(t('settings.profileSaved'));
     }).catch(() => {});
   };
 
@@ -74,24 +77,30 @@ const SettingsPage: React.FC = () => {
     const newRegions = myRegions.filter((r) => r !== region);
     accountApi.updateRegions(newRegions).then((cfg) => {
       setConfig(cfg);
-      message.success('地区配置已更新');
+      message.success(t('settings.profileSaved'));
     }).catch(() => {});
   };
 
   const handleAddCategory = () => {
     if (isPaid) {
-      Modal.info({ title: '添加品类', content: '付费版可添加全品类，功能开发中' });
+      Modal.info({ title: t('settings.addCategory'), content: t('pricing.allCategories') });
     } else {
-      message.info('更多品类属付费版功能');
+      message.info(t('pricing.upgradeDesc'));
     }
   };
 
   const handleAddRegion = () => {
     if (isPaid) {
-      Modal.info({ title: '添加地区', content: '付费版可添加全地区，功能开发中' });
+      Modal.info({ title: t('settings.addRegion'), content: t('pricing.allRegions') });
     } else {
-      message.info('更多地区属付费版功能');
+      message.info(t('pricing.upgradeDesc'));
     }
+  };
+
+  const changeLanguage = (lang: string) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem('language', lang);
+    message.success(t('settings.languageChanged'));
   };
 
   if (loading) {
@@ -106,42 +115,63 @@ const SettingsPage: React.FC = () => {
     <div>
       <div className="page-head">
         <div>
-          <h2>账号设置</h2>
-          <div className="desc">订阅配置 · 推送偏好 · 数据与隐私</div>
+          <h2>{t('settings.title')}</h2>
+          <div className="desc">{t('settings.subtitle')}</div>
         </div>
       </div>
 
       <div style={{ maxWidth: 760 }}>
         {/* 个人资料 */}
         <div className="setting-group">
-          <h3>个人资料</h3>
-          <div className="sg-sub">用于发送线索与账号找回</div>
+          <h3>{t('settings.profile')}</h3>
+          <div className="sg-sub">{t('settings.profileDesc')}</div>
           <div className="ss-card ss-card-pad">
             <Form form={form} layout="vertical" onFinish={handleSaveProfile}>
-              <Form.Item label="用户名" style={{ marginBottom: 16 }}>
+              <Form.Item label={t('settings.username')} style={{ marginBottom: 16 }}>
                 <Input value={profile?.username} disabled style={{ maxWidth: 360, background: '#F8FAFC' }} />
               </Form.Item>
-              <Form.Item name="email" label="邮箱" style={{ marginBottom: 16 }}>
-                <Input placeholder="用于找回密码（选填）" style={{ maxWidth: 360 }} />
+              <Form.Item name="email" label={t('settings.email')} style={{ marginBottom: 16 }}>
+                <Input placeholder={t('login.emailPlaceholder')} style={{ maxWidth: 360 }} />
               </Form.Item>
-              <Form.Item name="companyName" label="公司 / 团队名称" style={{ marginBottom: 16 }}>
-                <Input placeholder="请输入公司或团队名称" style={{ maxWidth: 360 }} />
+              <Form.Item name="companyName" label={t('settings.company')} style={{ marginBottom: 16 }}>
+                <Input placeholder={t('login.companyPlaceholder')} style={{ maxWidth: 360 }} />
               </Form.Item>
               <Button type="primary" htmlType="submit" loading={savingProfile}>
-                保存更改
+                {t('settings.saveProfile')}
               </Button>
             </Form>
           </div>
         </div>
 
+        {/* 语言设置 */}
+        <div className="setting-group">
+          <h3>{t('settings.language')}</h3>
+          <div className="sg-sub">{t('settings.languageDesc')}</div>
+          <div className="ss-card ss-card-pad">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <span style={{ fontSize: 13, color: 'var(--text-2)', minWidth: 80 }}>{t('settings.selectLanguage')}</span>
+              <Select
+                value={i18n.language === 'en' ? 'en' : 'zh'}
+                onChange={changeLanguage}
+                style={{ width: 200 }}
+                options={[
+                  { value: 'zh', label: t('common.chinese') },
+                  { value: 'en', label: t('common.english') },
+                ]}
+              />
+              <LanguageSwitcher />
+            </div>
+          </div>
+        </div>
+
         {/* 订阅配置 */}
         <div className="setting-group">
-          <h3>订阅配置</h3>
+          <h3>{t('settings.subscription')}</h3>
           <div className="sg-sub">
-            决定你收到哪些线索（试用版：{subscription?.maxCategories || 2} 个品类 + {subscription?.maxRegions || 1} 个地区 · 付费版全品类全地区）
+            {t('settings.subscriptionDesc')}（{t('pricing.trialPlan')}: {subscription?.maxCategories || 2} {t('pricing.categories')} + {subscription?.maxRegions || 1} {t('pricing.regions')} · {t('pricing.paidPlan')} {t('pricing.allCategories')}）
           </div>
           <div className="ss-card ss-card-pad">
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>监控品类</div>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>{t('settings.monitorCategories')}</div>
             <div className="chip-list" style={{ margin: '10px 0 18px' }}>
               {myCategories.map((c) => (
                 <span key={c} className="chip">
@@ -150,14 +180,14 @@ const SettingsPage: React.FC = () => {
                 </span>
               ))}
               {!isPaid && lockedCategories.map((c) => (
-                <span key={c} className="chip locked" onClick={() => message.info('更多品类属付费版功能')}>
+                <span key={c} className="chip locked" onClick={() => message.info(t('pricing.upgradeDesc'))}>
                   <LockIcon />{c}
                 </span>
               ))}
-              <span className="add-chip" onClick={handleAddCategory}>+ 添加品类</span>
+              <span className="add-chip" onClick={handleAddCategory}>+ {t('settings.addCategory')}</span>
             </div>
 
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>目标地区</div>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>{t('settings.monitorRegions')}</div>
             <div className="chip-list" style={{ margin: '10px 0 4px' }}>
               {myRegions.map((r) => (
                 <span key={r} className="chip">
@@ -166,62 +196,42 @@ const SettingsPage: React.FC = () => {
                 </span>
               ))}
               {!isPaid && lockedRegions.map((r) => (
-                <span key={r} className="chip locked" onClick={() => message.info('更多地区属付费版功能')}>
+                <span key={r} className="chip locked" onClick={() => message.info(t('pricing.upgradeDesc'))}>
                   <LockIcon />{r}
                 </span>
               ))}
-              <span className="add-chip" onClick={handleAddRegion}>+ 添加地区</span>
-            </div>
-          </div>
-        </div>
-
-        {/* 自定义关键词过滤 */}
-        <div className="setting-group">
-          <h3>自定义关键词过滤</h3>
-          <div className="sg-sub">命中关键词的线索优先展示，不匹配的自动隐藏（付费版功能）</div>
-          <div className="ss-card ss-card-pad">
-            <div className="chip-list">
-              {myKeywords.length > 0 ? (
-                myKeywords.map((k) => (
-                  <span key={k} className="chip">{k}</span>
-                ))
-              ) : (
-                <span className="chip locked" onClick={() => message.info('自定义关键词过滤属付费版功能')}>
-                  <LockIcon />升级后可用
-                </span>
-              )}
+              <span className="add-chip" onClick={handleAddRegion}>+ {t('settings.addRegion')}</span>
             </div>
           </div>
         </div>
 
         {/* 数据与历史 */}
         <div className="setting-group">
-          <h3>数据与历史</h3>
-          <div className="sg-sub">线索历史保存与数据权益</div>
+          <h3>{t('settings.dataPrivacy')}</h3>
+          <div className="sg-sub">{t('settings.dataPrivacyDesc')}</div>
           <div className="ss-card ss-card-pad">
             <div className="meta-row" style={{ border: 'none', padding: '8px 0' }}>
-              <span className="k" style={{ width: 'auto', marginRight: 12 }}>历史线索库</span>
+              <span className="k" style={{ width: 'auto', marginRight: 12 }}>{t('pricing.history')}</span>
               <span className="v">
-                {subscription?.historyDays || 7} 天（{isPaid ? '付费版' : '试用版'}）
-                {isPaid ? ' · 可查 30 天并导出 CSV' : ' · 付费版可查 30 天并导出 CSV'}
+                {subscription?.historyDays || 7} {t('common.days')}（{isPaid ? t('pricing.paidPlan') : t('pricing.trialPlan')}）
               </span>
             </div>
             <div className="meta-row" style={{ border: 'none', padding: '8px 0' }}>
-              <span className="k" style={{ width: 'auto', marginRight: 12 }}>数据来源</span>
-              <span className="v">Reddit 公开帖子 · 官方授权 API · 不转售个人隐私数据</span>
+              <span className="k" style={{ width: 'auto', marginRight: 12 }}>{t('settings.exportData')}</span>
+              <span className="v">
+                <a onClick={() => message.info(t('notify.comingSoon'))} style={{ cursor: 'pointer' }}>{t('settings.exportData')}</a>
+              </span>
             </div>
             <div className="meta-row" style={{ border: 'none', padding: '8px 0' }}>
-              <span className="k" style={{ width: 'auto', marginRight: 12 }}>隐私</span>
+              <span className="k" style={{ width: 'auto', marginRight: 12 }}>{t('settings.deleteAccount')}</span>
               <span className="v">
-                <a onClick={() => message.info('隐私政策文档即将上线')} style={{ cursor: 'pointer' }}>查看隐私政策</a>
-                {' · '}
                 <a onClick={() => {
                   Modal.confirm({
-                    title: '申请删除我的数据',
-                    content: '确认要删除您的所有数据吗？此操作不可恢复。',
-                    onOk: () => message.success('已提交数据删除申请'),
+                    title: t('settings.deleteAccount'),
+                    content: t('settings.deleteAccountDesc'),
+                    onOk: () => message.success(t('common.success')),
                   });
-                }} style={{ cursor: 'pointer' }}>申请删除我的数据</a>
+                }} style={{ cursor: 'pointer', color: '#DC2626' }}>{t('settings.deleteAccount')}</a>
               </span>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Select, Input, Button, Table, Tooltip, message, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { leadApi } from '@/api';
@@ -12,6 +13,7 @@ const CATEGORIES = ['宠物用品', '户外露营', '3C数码', '家居收纳', 
 
 const LeadsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<Lead[]>([]);
   const [total, setTotal] = useState(0);
@@ -53,7 +55,7 @@ const LeadsPage: React.FC = () => {
     try {
       const res = await leadApi.toggleMark(id);
       setData((prev) => prev.map((l) => (l.id === id ? { ...l, marked: res.marked } : l)));
-      message.success(res.marked ? '已标记为跟进中' : '已取消标记');
+      message.success(res.marked ? t('leads.markReviewed') : t('leads.markUnreviewed'));
     } catch {
       // 错误已处理
     }
@@ -67,22 +69,22 @@ const LeadsPage: React.FC = () => {
   const formatTime = (timeStr: string) => {
     if (!timeStr) return '';
     const diff = dayjs().diff(dayjs(timeStr), 'hour');
-    if (diff < 1) return '刚刚';
-    if (diff < 24) return `${diff}h前`;
+    if (diff < 1) return t('dashboard.justNow');
+    if (diff < 24) return `${diff}h`;
     const days = Math.floor(diff / 24);
-    return days === 1 ? '昨天' : `${days}天前`;
+    return days === 1 ? t('dashboard.yesterday') : `${days}d`;
   };
 
   const columns: ColumnsType<Lead> = [
     {
-      title: '等级',
+      title: t('leads.grade'),
       dataIndex: 'grade',
       key: 'grade',
       width: 80,
       render: (grade: Grade) => <GradeBadge grade={grade} />,
     },
     {
-      title: '线索摘要',
+      title: t('leads.leadTitle'),
       dataIndex: 'title',
       key: 'title',
       ellipsis: true,
@@ -98,14 +100,14 @@ const LeadsPage: React.FC = () => {
       ),
     },
     {
-      title: '品类',
+      title: t('leads.category'),
       dataIndex: 'category',
       key: 'category',
       width: 100,
       render: (cat: string) => <Tag style={{ margin: 0 }}>{cat}</Tag>,
     },
     {
-      title: '量级',
+      title: t('leadDetail.orderScale'),
       dataIndex: 'orderScale',
       key: 'orderScale',
       width: 140,
@@ -113,7 +115,7 @@ const LeadsPage: React.FC = () => {
       render: (v: string) => translateOrderScale(v),
     },
     {
-      title: '需求类型',
+      title: t('leadDetail.needType'),
       dataIndex: 'needType',
       key: 'needType',
       width: 140,
@@ -121,25 +123,25 @@ const LeadsPage: React.FC = () => {
       render: (v: string) => translateNeedType(v),
     },
     {
-      title: '地区',
+      title: t('leads.region'),
       dataIndex: 'region',
       key: 'region',
       width: 80,
       render: (v: string) => translateRegion(v),
     },
     {
-      title: '时间',
+      title: t('leads.postedAt'),
       dataIndex: 'pushedAt',
       key: 'pushedAt',
       width: 80,
       render: (time: string) => <span className="num">{formatTime(time)}</span>,
     },
     {
-      title: '操作',
+      title: t('common.action'),
       key: 'action',
       width: 60,
       render: (_, record) => (
-        <Tooltip title={record.marked ? '取消标记' : '标记跟进'}>
+        <Tooltip title={record.marked ? t('leads.markUnreviewed') : t('leads.markReviewed')}>
           <button
             onClick={(e) => handleToggleMark(record.id, e)}
             style={{
@@ -163,34 +165,33 @@ const LeadsPage: React.FC = () => {
     <div>
       <div className="page-head">
         <div>
-          <h2>线索库</h2>
+          <h2>{t('leads.title')}</h2>
           <div className="desc">
-            共 <b className="num">{total}</b> 条匹配线索 · 试用版可见最近 7 天 · 付费版 30 天历史并支持 CSV 导出
+            {t('leads.total')} <b className="num">{total}</b> {t('leads.itemsSuffix')}
           </div>
         </div>
-        <Button onClick={() => message.info('CSV 导出属付费版功能')} style={{ height: 38 }}>
-          导出 CSV
+        <Button onClick={() => message.info(t('notify.comingSoon'))} style={{ height: 38 }}>
+          CSV
         </Button>
       </div>
 
-      {/* 筛选器 */}
       <div className="filters">
-        <span className="lbl">筛选</span>
+        <span className="lbl">{t('common.search')}</span>
         <Select
           allowClear
-          placeholder="全部等级"
+          placeholder={t('common.all') + t('leads.grade')}
           style={{ width: 110 }}
           value={filters.grade}
           onChange={(v) => { setFilters((f) => ({ ...f, grade: v })); setPage(1); }}
           options={[
-            { value: 'S', label: 'S 级' },
-            { value: 'A', label: 'A 级' },
-            { value: 'B', label: 'B 级' },
+            { value: 'S', label: t('grade.s') },
+            { value: 'A', label: t('grade.a') },
+            { value: 'B', label: t('grade.b') },
           ]}
         />
         <Select
           allowClear
-          placeholder="全部品类"
+          placeholder={t('common.all') + t('leads.category')}
           style={{ width: 130 }}
           value={filters.category}
           onChange={(v) => { setFilters((f) => ({ ...f, category: v })); setPage(1); }}
@@ -198,7 +199,7 @@ const LeadsPage: React.FC = () => {
         />
         <Select
           allowClear
-          placeholder="全部地区"
+          placeholder={t('common.all') + t('leads.region')}
           style={{ width: 110 }}
           value={filters.region}
           onChange={(v) => { setFilters((f) => ({ ...f, region: v })); setPage(1); }}
@@ -210,32 +211,15 @@ const LeadsPage: React.FC = () => {
             { value: 'OTHER', label: '其他' },
           ]}
         />
-        <Select
-          allowClear
-          placeholder="全部需求类型"
-          style={{ width: 150 }}
-          value={filters.needType}
-          onChange={(v) => { setFilters((f) => ({ ...f, needType: v })); setPage(1); }}
-          options={[
-            { value: 'FULL_AGENT', label: '找全链路采购代理' },
-            { value: 'FACTORY', label: '找工厂代工' },
-            { value: 'QC', label: '找质检服务' },
-            { value: 'LOGISTICS', label: '找物流清关' },
-            { value: 'SUPPLY_CHAIN', label: '找供应链合作' },
-            { value: 'CONSIDERING_AGENT', label: '考虑找代理' },
-            { value: 'BEGINNER', label: '新手入门咨询' },
-          ]}
-        />
         <Input.Search
-          placeholder="关键词过滤…"
+          placeholder={t('leads.searchPlaceholder')}
           allowClear
           style={{ width: 180 }}
           onSearch={(v) => { setFilters((f) => ({ ...f, keyword: v || undefined })); setPage(1); }}
         />
-        <button className="link-btn" onClick={handleClearFilters}>清除筛选</button>
+        <button className="link-btn" onClick={handleClearFilters}>{t('common.reset')}</button>
       </div>
 
-      {/* 线索表格 */}
       <div className="ss-card">
         <Table<Lead>
           rowKey="id"
@@ -247,7 +231,7 @@ const LeadsPage: React.FC = () => {
             pageSize,
             total,
             showSizeChanger: false,
-            showTotal: (t) => `共 ${t} 条`,
+            showTotal: (totalCount) => `${totalCount} ${t('common.items')}`,
             onChange: (p) => setPage(p),
           }}
           onRow={(record) => ({

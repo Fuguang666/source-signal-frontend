@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Form, Input, Button, message, Tabs } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/store/auth';
 import { authApi } from '@/api';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuthStore();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
 
@@ -15,7 +18,7 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       await login(values.username, values.password);
-      message.success('登录成功，欢迎回来');
+      message.success(t('login.loginSuccess'));
       navigate('/dashboard');
     } catch {
       // 错误已在拦截器处理
@@ -28,7 +31,7 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       await authApi.register({ username: values.username, password: values.password, email: values.email });
-      message.success('注册成功，已自动登录');
+      message.success(t('login.registerSuccess'));
       navigate('/dashboard');
     } catch {
       // 错误已在拦截器处理
@@ -42,6 +45,11 @@ const LoginPage: React.FC = () => {
       minHeight: '100vh', background: 'var(--ink)', display: 'grid', placeItems: 'center',
       padding: 24, position: 'relative', overflow: 'hidden',
     }}>
+      {/* 右上角语言切换 */}
+      <div style={{ position: 'absolute', top: 20, right: 24, zIndex: 10 }}>
+        <LanguageSwitcher />
+      </div>
+
       {/* 背景装饰 */}
       <div style={{
         position: 'absolute', inset: 0,
@@ -77,23 +85,23 @@ const LoginPage: React.FC = () => {
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: .5 }}>SourceSignal</div>
-              <div style={{ color: 'var(--text-3)', fontSize: 12.5, letterSpacing: 1 }}>采购信号 · CROSS-BORDER SOURCING INTELLIGENCE</div>
+              <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: .5 }}>{t('login.title')}</div>
+              <div style={{ color: 'var(--text-3)', fontSize: 12.5, letterSpacing: 1 }}>{t('login.subtitle')} · CROSS-BORDER SOURCING INTELLIGENCE</div>
             </div>
           </div>
 
           <h1 style={{ fontSize: 30, lineHeight: 1.3, fontWeight: 700, letterSpacing: .5 }}>
-            把海外采购需求，<br />变成<em style={{ fontStyle: 'normal', color: 'var(--primary)' }}>可立即跟进</em>的商机
+            {t('login.slogan1')}<br />{t('login.slogan2')}
           </h1>
           <p style={{ color: 'var(--text-2)', fontSize: 14.5, lineHeight: 1.8 }}>
-            实时采集 Reddit 跨境采购社区公开需求，AI 打标分级，5 分钟内推送高意向采购线索。中文界面，多渠道触达。
+            {t('login.desc')}
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
             {[
-              { grade: 's', text: 'Looking for a sourcing agent for pet products from China', meta: 'S 级 · 高意向' },
-              { grade: 'a', text: 'Considering hiring an agent for home organization products', meta: 'A 级 · 中意向' },
-              { grade: 'b', text: 'New to importing from China, how does sourcing work?', meta: 'B 级 · 低意向' },
+              { grade: 's', text: 'Looking for a sourcing agent for pet products from China', meta: `${t('grade.s')} · ${t('grade.sDesc')}` },
+              { grade: 'a', text: 'Considering hiring an agent for home organization products', meta: `${t('grade.a')} · ${t('grade.aDesc')}` },
+              { grade: 'b', text: 'New to importing from China, how does sourcing work?', meta: `${t('grade.b')} · ${t('grade.bDesc')}` },
             ].map((item, i) => (
               <div key={i} style={{
                 display: 'flex', alignItems: 'center', gap: 12, background: '#fff',
@@ -116,8 +124,8 @@ const LoginPage: React.FC = () => {
             activeKey={activeTab}
             onChange={(key) => setActiveTab(key as 'login' | 'register')}
             items={[
-              { key: 'login', label: '登录' },
-              { key: 'register', label: '注册' },
+              { key: 'login', label: t('login.tabLogin') },
+              { key: 'register', label: t('login.tabRegister') },
             ]}
             style={{ marginBottom: 20 }}
           />
@@ -131,25 +139,25 @@ const LoginPage: React.FC = () => {
             >
               <Form.Item
                 name="username"
-                label="用户名"
-                rules={[{ required: true, message: '请输入用户名' }]}
+                label={t('login.username')}
+                rules={[{ required: true, message: t('login.usernameRequired') }]}
               >
-                <Input prefix={<UserOutlined style={{ color: '#94A3B8' }} />} placeholder="请输入用户名" autoComplete="off" />
+                <Input prefix={<UserOutlined style={{ color: '#94A3B8' }} />} placeholder={t('login.usernamePlaceholder')} autoComplete="off" />
               </Form.Item>
               <Form.Item
                 name="password"
-                label="密码"
-                rules={[{ required: true, message: '请输入密码' }]}
+                label={t('login.password')}
+                rules={[{ required: true, message: t('login.passwordRequired') }]}
               >
-                <Input.Password prefix={<LockOutlined style={{ color: '#94A3B8' }} />} placeholder="请输入密码" autoComplete="new-password" />
+                <Input.Password prefix={<LockOutlined style={{ color: '#94A3B8' }} />} placeholder={t('login.passwordPlaceholder')} autoComplete="new-password" />
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit" loading={loading} block style={{ height: 44, fontSize: 15, fontWeight: 600 }}>
-                  登录
+                  {t('login.loginBtn')}
                 </Button>
               </Form.Item>
               <div style={{ textAlign: 'center', color: 'var(--text-3)', fontSize: 12.5 }}>
-                还没有账号？<a onClick={() => setActiveTab('register')} style={{ color: 'var(--primary)', fontWeight: 600, cursor: 'pointer' }}>免费注册，开启 7 天试用</a>
+                {t('login.noAccount')}<a onClick={() => setActiveTab('register')} style={{ color: 'var(--primary)', fontWeight: 600, cursor: 'pointer' }}>{t('login.goRegister')}</a>
               </div>
             </Form>
           ) : (
@@ -161,39 +169,39 @@ const LoginPage: React.FC = () => {
             >
               <Form.Item
                 name="username"
-                label="用户名"
+                label={t('login.username')}
                 rules={[
-                  { required: true, message: '请输入用户名' },
-                  { min: 3, message: '用户名至少 3 个字符' },
-                  { max: 20, message: '用户名最多 20 个字符' },
+                  { required: true, message: t('login.usernameRequired') },
+                  { min: 3, message: t('login.usernameMin') },
+                  { max: 20, message: t('login.usernameMax') },
                 ]}
               >
-                <Input prefix={<UserOutlined style={{ color: '#94A3B8' }} />} placeholder="设置用户名（用于登录）" autoComplete="off" />
+                <Input prefix={<UserOutlined style={{ color: '#94A3B8' }} />} placeholder={t('login.registerUsernamePlaceholder')} autoComplete="off" />
               </Form.Item>
               <Form.Item
                 name="email"
-                label="邮箱（选填）"
-                rules={[{ type: 'email', message: '请输入有效的邮箱地址' }]}
+                label={t('login.email')}
+                rules={[{ type: 'email', message: t('login.emailInvalid') }]}
               >
-                <Input prefix={<MailOutlined style={{ color: '#94A3B8' }} />} placeholder="用于找回密码（选填）" autoComplete="off" />
+                <Input prefix={<MailOutlined style={{ color: '#94A3B8' }} />} placeholder={t('login.emailPlaceholder')} autoComplete="off" />
               </Form.Item>
               <Form.Item
                 name="password"
-                label="密码"
+                label={t('login.password')}
                 rules={[
-                  { required: true, message: '请输入密码' },
-                  { min: 6, message: '密码至少 6 个字符' },
+                  { required: true, message: t('login.passwordRequired') },
+                  { min: 6, message: t('login.passwordMin') },
                 ]}
               >
-                <Input.Password prefix={<LockOutlined style={{ color: '#94A3B8' }} />} placeholder="设置密码（至少 6 位）" autoComplete="new-password" />
+                <Input.Password prefix={<LockOutlined style={{ color: '#94A3B8' }} />} placeholder={t('login.registerPasswordPlaceholder')} autoComplete="new-password" />
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit" loading={loading} block style={{ height: 44, fontSize: 15, fontWeight: 600 }}>
-                  注册并开启 7 天免费试用
+                  {t('login.registerBtn')}
                 </Button>
               </Form.Item>
               <div style={{ textAlign: 'center', color: 'var(--text-3)', fontSize: 12.5 }}>
-                已有账号？<a onClick={() => setActiveTab('login')} style={{ color: 'var(--primary)', fontWeight: 600, cursor: 'pointer' }}>立即登录</a>
+                {t('login.hasAccount')}<a onClick={() => setActiveTab('login')} style={{ color: 'var(--primary)', fontWeight: 600, cursor: 'pointer' }}>{t('login.goLogin')}</a>
               </div>
             </Form>
           )}
