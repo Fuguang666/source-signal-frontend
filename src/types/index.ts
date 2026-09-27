@@ -70,6 +70,7 @@ export interface LeadFilter {
   needType?: string;
   keyword?: string;
   marked?: boolean;
+  unread?: boolean;
   page?: number;
   size?: number;
 }
@@ -78,6 +79,7 @@ export interface LeadFilter {
 export interface DashboardDTO {
   todayNewLeads: number;
   todaySGradeLeads: number;
+  todayAGradeLeads: number;
   totalLeads: number;
   unreadCount: number;
   dailySampleLimit: number;

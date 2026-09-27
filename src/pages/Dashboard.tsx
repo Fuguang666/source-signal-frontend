@@ -32,7 +32,7 @@ const DashboardPage: React.FC = () => {
     return <Empty description={t('dashboard.noData')} />;
   }
 
-  const aGradeCount = data.gradeDistribution?.find((g) => g.grade === 'A')?.count || 0;
+  const aGradeCount = data.todayAGradeLeads || 0;
   const topCategories = (data.categoryDistribution || []).slice(0, 15);
   const maxCat = Math.max(...(topCategories.map((c) => c.count) || [1]), 1);
   const recentLeads = data.recentLeads || [];
@@ -143,8 +143,22 @@ const DashboardPage: React.FC = () => {
         <div className="timeline">
           {recentLeads.slice(0, 5).map((lead) => (
             <div key={lead.id} className={`tl-item ${lead.grade.toLowerCase()}`}>
-              <div className="tt" onClick={() => navigate(`/app/lead/${lead.id}`)}>
-                {lead.title}
+              <div className="tt" onClick={() => navigate(`/app/lead/${lead.id}`)} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {!lead.isRead && (
+                  <span style={{
+                    display: 'inline-block',
+                    background: 'linear-gradient(135deg, #EF4444, #DC2626)',
+                    color: '#fff',
+                    fontSize: 9,
+                    fontWeight: 700,
+                    padding: '1px 5px',
+                    borderRadius: 3,
+                    lineHeight: 1.5,
+                    flexShrink: 0,
+                    letterSpacing: 0.5,
+                  }}>NEW</span>
+                )}
+                <span style={{ fontWeight: !lead.isRead ? 700 : 500 }}>{lead.title}</span>
               </div>
               <div className="tm">
                 <GradeBadge grade={lead.grade} />

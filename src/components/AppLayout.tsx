@@ -3,7 +3,7 @@ import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Dropdown, Badge, message } from 'antd';
 import { useAuthStore } from '@/store/auth';
-import { subscriptionApi, pushApi } from '@/api';
+import { subscriptionApi, pushApi, leadApi } from '@/api';
 import LanguageSwitcher from './LanguageSwitcher';
 
 const NavIcon: React.FC<{ type: string }> = ({ type }) => {
@@ -23,6 +23,13 @@ const AppLayout: React.FC = () => {
   const { t } = useTranslation();
   const { user, logout, subscription, setSubscription } = useAuthStore();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [leadUnreadCount, setLeadUnreadCount] = useState(0);
+
+  const fetchLeadUnread = () => {
+    leadApi.getUnreadCount().then((res) => {
+      setLeadUnreadCount(res?.count ?? 0);
+    }).catch(() => {});
+  };
 
   const NAV_ITEMS = [
     { key: '/app/dashboard', label: t('layout.dashboard'), icon: 'dashboard' },
@@ -48,6 +55,15 @@ const AppLayout: React.FC = () => {
   useEffect(() => {
     subscriptionApi.getSubscription().then((sub) => { setSubscription(sub); }).catch(() => {});
     pushApi.getUnreadCount().then((res) => { setUnreadCount(typeof res === "number" ? res : 0); }).catch(() => {});
+    fetchLeadUnread();
+    const timer = setInterval(fetchLeadUnread, 30000);
+    // 监听未读状态变化事件，立即刷新
+    const handleUnreadChanged = () => fetchLeadUnread();
+    window.addEventListener('lead-unread-changed', handleUnreadChanged);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('lead-unread-changed', handleUnreadChanged);
+    };
   }, [setSubscription]);
 
   const trialDaysLeft = subscription?.trialDaysLeft ?? 7;
@@ -82,13 +98,24 @@ const AppLayout: React.FC = () => {
 
         <nav style={{ padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: 2, flex: 1, overflowY: 'auto' }}>
           {NAV_ITEMS.map((item) => (
-            <button key={item.key} onClick={() => navigate(item.key)} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 12px', borderRadius: 8, color: activeKey === item.key ? 'var(--primary-dark)' : '#64748B', fontSize: 13.5, cursor: 'pointer', border: 'none', background: activeKey === item.key ? 'var(--primary-soft)' : 'transparent', width: '100%', textAlign: 'left', transition: 'all .15s', position: 'relative' }}
+            <button key={item.key}
+              onClick={() => {
+                if (item.key === '/app/leads' && leadUnreadCount > 0) {
+                  navigate('/app/leads?unread=true');
+                } else {
+                  navigate(item.key);
+                }
+              }}
+              style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 12px', borderRadius: 8, color: activeKey === item.key ? 'var(--primary-dark)' : '#64748B', fontSize: 13.5, cursor: 'pointer', border: 'none', background: activeKey === item.key ? 'var(--primary-soft)' : 'transparent', width: '100%', textAlign: 'left', transition: 'all .15s', position: 'relative' }}
               onMouseEnter={(e) => { if (activeKey !== item.key) { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = 'var(--text)'; } }}
               onMouseLeave={(e) => { if (activeKey !== item.key) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748B'; } }}
             >
               {activeKey === item.key && (<span style={{ position: 'absolute', left: 0, width: 3, height: 22, borderRadius: '0 3px 3px 0', background: 'var(--primary)' }} />)}
               <NavIcon type={item.icon} />
               <span>{item.label}</span>
+              {item.key === '/app/leads' && leadUnreadCount > 0 && (
+                <Badge count={leadUnreadCount} size="small" style={{ marginLeft: 'auto', backgroundColor: '#EF4444' }} />
+              )}
               {item.key === '/notify' && unreadCount > 0 && (<Badge count={unreadCount} size="small" style={{ marginLeft: 'auto' }} />)}
             </button>
           ))}

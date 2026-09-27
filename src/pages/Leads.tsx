@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Select, Input, Button, Table, Tooltip, message, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -13,6 +13,7 @@ const CATEGORIES = ['宠物用品', '户外露营', '3C数码', '家居收纳', 
 
 const LeadsPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<Lead[]>([]);
@@ -26,7 +27,17 @@ const LeadsPage: React.FC = () => {
     needType: undefined as string | undefined,
     keyword: undefined as string | undefined,
     marked: undefined as string | undefined,
+    unread: searchParams.get('unread') === 'true' ? 'true' : undefined as string | undefined,
   });
+
+  // 当 URL 参数变化时同步筛选
+  useEffect(() => {
+    const urlUnread = searchParams.get('unread');
+    if (urlUnread === 'true' && filters.unread !== 'true') {
+      setFilters((f) => ({ ...f, unread: 'true' }));
+      setPage(1);
+    }
+  }, [searchParams]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -40,6 +51,7 @@ const LeadsPage: React.FC = () => {
         needType: filters.needType,
         keyword: filters.keyword,
         marked: filters.marked === 'true' ? true : filters.marked === 'false' ? false : undefined,
+        unread: filters.unread === 'true' ? true : filters.unread === 'false' ? false : undefined,
       });
       setData(res.list || []);
       setTotal(res.total || 0);
@@ -64,8 +76,21 @@ const LeadsPage: React.FC = () => {
   };
 
   const handleClearFilters = () => {
-    setFilters({ grade: undefined, category: undefined, region: undefined, needType: undefined, keyword: undefined, marked: undefined });
+    setFilters({ grade: undefined, category: undefined, region: undefined, needType: undefined, keyword: undefined, marked: undefined, unread: undefined });
     setPage(1);
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      const res = await leadApi.markAllAsRead();
+      message.success(`${t('leads.markAllReadSuccess')} ${res.count}`);
+      // 触发全局事件，通知侧边栏刷新未读数量
+      window.dispatchEvent(new CustomEvent('lead-unread-changed'));
+      // 重新加载列表
+      fetchData();
+    } catch {
+      // 错误已处理
+    }
   };
 
   const formatTime = (timeStr: string) => {
@@ -82,66 +107,108 @@ const LeadsPage: React.FC = () => {
       title: t('leads.grade'),
       dataIndex: 'grade',
       key: 'grade',
-      width: 80,
+      width: 100,
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
       render: (grade: Grade) => <GradeBadge grade={grade} />,
     },
     {
       title: t('leads.leadTitle'),
       dataIndex: 'title',
       key: 'title',
+      width: 280,
       ellipsis: true,
-      render: (_: string, record) => (
-        <div>
-          <div style={{ color: 'var(--text)', fontWeight: 500, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-            {record.title}
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
+      render: (_: string, record) => {
+        const isUnread = !record.isRead;
+        return (
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+            {isUnread && (
+              <span style={{
+                display: 'inline-block',
+                background: 'linear-gradient(135deg, #EF4444, #DC2626)',
+                color: '#fff',
+                fontSize: 10,
+                fontWeight: 700,
+                padding: '1px 6px',
+                borderRadius: 4,
+                lineHeight: 1.6,
+                marginTop: 2,
+                flexShrink: 0,
+                letterSpacing: 0.5,
+              }}>NEW</span>
+            )}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                color: 'var(--text)',
+                fontWeight: isUnread ? 700 : 500,
+                lineHeight: 1.5,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}>
+                {record.title}
+              </div>
+              <div style={{ color: 'var(--text-3)', fontWeight: 400, fontSize: 12, marginTop: 2 }}>
+                {record.author} · {record.subreddit}
+              </div>
+            </div>
           </div>
-          <div style={{ color: 'var(--text-3)', fontWeight: 400, fontSize: 12, marginTop: 2 }}>
-            {record.author} · {record.subreddit}
-          </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       title: t('leads.category'),
       dataIndex: 'category',
       key: 'category',
-      width: 100,
+      width: 110,
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
+      onCell: () => ({ style: { whiteSpace: 'nowrap' } }),
       render: (cat: string) => <Tag style={{ margin: 0 }}>{cat}</Tag>,
     },
     {
       title: t('leadDetail.orderScale'),
       dataIndex: 'orderScale',
       key: 'orderScale',
-      width: 140,
+      width: 130,
       ellipsis: true,
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
+      onCell: () => ({ style: { whiteSpace: 'nowrap' } }),
       render: (v: string) => translateOrderScale(v),
     },
     {
       title: t('leadDetail.needType'),
       dataIndex: 'needType',
       key: 'needType',
-      width: 140,
+      width: 120,
       ellipsis: true,
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
+      onCell: () => ({ style: { whiteSpace: 'nowrap' } }),
       render: (v: string) => translateNeedType(v),
     },
     {
       title: t('leads.region'),
       dataIndex: 'region',
       key: 'region',
-      width: 80,
+      width: 100,
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
+      onCell: () => ({ style: { whiteSpace: 'nowrap' } }),
       render: (v: string) => translateRegion(v),
     },
     {
       title: t('leads.postedAt'),
       dataIndex: 'postedAt',
       key: 'postedAt',
-      width: 140,
+      width: 165,
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
+      onCell: () => ({ style: { whiteSpace: 'nowrap' } }),
       render: (time: string) => <span className="num">{time ? dayjs(time).format('YYYY-MM-DD HH:mm') : '-'}</span>,
     },
     {
       title: t('common.action'),
       key: 'action',
-      width: 60,
+      width: 70,
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
       render: (_, record) => (
         <Tooltip title={record.marked ? t('leads.markUnreviewed') : t('leads.markReviewed')}>
           <button
@@ -172,9 +239,14 @@ const LeadsPage: React.FC = () => {
             {t('leads.total')} <b className="num">{total}</b> {t('leads.itemsSuffix')}
           </div>
         </div>
-        <Button onClick={() => message.info(t('notify.comingSoon'))} style={{ height: 38 }}>
-          CSV
-        </Button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button onClick={handleMarkAllRead} style={{ height: 38 }}>
+            {t('leads.markAllRead')}
+          </Button>
+          <Button onClick={() => message.info(t('notify.comingSoon'))} style={{ height: 38 }}>
+            CSV
+          </Button>
+        </div>
       </div>
 
       <div className="filters">
@@ -224,6 +296,25 @@ const LeadsPage: React.FC = () => {
             { value: 'false', label: t('leads.unmarked') },
           ]}
         />
+        <Select
+          allowClear
+          placeholder={t('leads.readStatus')}
+          style={{ width: 120 }}
+          value={filters.unread}
+          onChange={(v) => {
+            setFilters((f) => ({ ...f, unread: v }));
+            setPage(1);
+            if (v === 'true') {
+              setSearchParams({ unread: 'true' });
+            } else {
+              setSearchParams({});
+            }
+          }}
+          options={[
+            { value: 'true', label: t('leads.unread') },
+            { value: 'false', label: t('leads.read') },
+          ]}
+        />
         <Input.Search
           placeholder={t('leads.searchPlaceholder')}
           allowClear
@@ -249,9 +340,12 @@ const LeadsPage: React.FC = () => {
           }}
           onRow={(record) => ({
             onClick: () => navigate(`/app/lead/${record.id}`),
-            style: { cursor: 'pointer' },
+            style: {
+              cursor: 'pointer',
+              background: !record.isRead ? '#F0F7FF' : undefined,
+            },
           })}
-          scroll={{ x: 900 }}
+          scroll={{ x: 1075 }}
         />
       </div>
     </div>

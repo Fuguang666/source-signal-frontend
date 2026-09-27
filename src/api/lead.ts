@@ -16,4 +16,13 @@ export const leadApi = {
 
   getMarkedLeads: () =>
     request.get<unknown, Lead[]>('/leads/marked'),
+
+  getUnreadCount: () =>
+    request.get<unknown, { count: number }>('/leads/unread-count'),
+
+  markAsRead: (id: number) =>
+    request.post<unknown, void>(`/leads/${id}/read`),
+
+  markAllAsRead: () =>
+    request.post<unknown, { count: number }>('/leads/read-all'),
 };
