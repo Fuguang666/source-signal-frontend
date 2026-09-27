@@ -5,6 +5,7 @@ import zhCN from 'antd/locale/zh_CN';
 import AppLayout from '@/components/AppLayout';
 import AdminLayout from '@/components/AdminLayout';
 import LoginPage from '@/pages/Login';
+import LandingPage from '@/pages/Landing';
 import DashboardPage from '@/pages/Dashboard';
 import LeadsPage from '@/pages/Leads';
 import LeadDetailPage from '@/pages/LeadDetail';
@@ -68,16 +69,19 @@ const App: React.FC = () => {
     >
       <BrowserRouter>
         <Routes>
+          {/* 官网首页 */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
+          {/* 应用内页面 */}
           <Route
-            path="/"
+            path="/app"
             element={
               <RequireAuth>
                 <AppLayout />
               </RequireAuth>
             }
           >
-            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route index element={<Navigate to="/app/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="leads" element={<LeadsPage />} />
             <Route path="lead/:id" element={<LeadDetailPage />} />
@@ -85,7 +89,7 @@ const App: React.FC = () => {
             <Route path="notify" element={<NotifyPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
           {/* 后台管理 */}
           <Route
             path="/admin"

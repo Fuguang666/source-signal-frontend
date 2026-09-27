@@ -25,6 +25,7 @@ const LeadsPage: React.FC = () => {
     region: undefined as string | undefined,
     needType: undefined as string | undefined,
     keyword: undefined as string | undefined,
+    marked: undefined as string | undefined,
   });
 
   const fetchData = useCallback(async () => {
@@ -38,6 +39,7 @@ const LeadsPage: React.FC = () => {
         region: filters.region,
         needType: filters.needType,
         keyword: filters.keyword,
+        marked: filters.marked === 'true' ? true : filters.marked === 'false' ? false : undefined,
       });
       setData(res.list || []);
       setTotal(res.total || 0);
@@ -62,7 +64,7 @@ const LeadsPage: React.FC = () => {
   };
 
   const handleClearFilters = () => {
-    setFilters({ grade: undefined, category: undefined, region: undefined, needType: undefined, keyword: undefined });
+    setFilters({ grade: undefined, category: undefined, region: undefined, needType: undefined, keyword: undefined, marked: undefined });
     setPage(1);
   };
 
@@ -131,10 +133,10 @@ const LeadsPage: React.FC = () => {
     },
     {
       title: t('leads.postedAt'),
-      dataIndex: 'pushedAt',
-      key: 'pushedAt',
-      width: 80,
-      render: (time: string) => <span className="num">{formatTime(time)}</span>,
+      dataIndex: 'postedAt',
+      key: 'postedAt',
+      width: 140,
+      render: (time: string) => <span className="num">{time ? dayjs(time).format('YYYY-MM-DD HH:mm') : '-'}</span>,
     },
     {
       title: t('common.action'),
@@ -211,6 +213,17 @@ const LeadsPage: React.FC = () => {
             { value: 'OTHER', label: '其他' },
           ]}
         />
+        <Select
+          allowClear
+          placeholder={t('leads.markStatus')}
+          style={{ width: 120 }}
+          value={filters.marked}
+          onChange={(v) => { setFilters((f) => ({ ...f, marked: v })); setPage(1); }}
+          options={[
+            { value: 'true', label: t('leads.marked') },
+            { value: 'false', label: t('leads.unmarked') },
+          ]}
+        />
         <Input.Search
           placeholder={t('leads.searchPlaceholder')}
           allowClear
@@ -235,7 +248,7 @@ const LeadsPage: React.FC = () => {
             onChange: (p) => setPage(p),
           }}
           onRow={(record) => ({
-            onClick: () => navigate(`/lead/${record.id}`),
+            onClick: () => navigate(`/app/lead/${record.id}`),
             style: { cursor: 'pointer' },
           })}
           scroll={{ x: 900 }}

@@ -69,6 +69,7 @@ export interface LeadFilter {
   region?: string;
   needType?: string;
   keyword?: string;
+  marked?: boolean;
   page?: number;
   size?: number;
 }

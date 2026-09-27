@@ -1,0 +1,72 @@
+/* ===== 登录页动态背景（与官网一致） ===== */
+
+/* 背景容器 */
+.login-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 渐变 + 网格底层 */
+.login-bg-grid {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, #F4F9F8 0%, #F7FAFC 34%, #FFFFFF 100%),
+    repeating-linear-gradient(0deg, rgba(15,118,110,.045) 0 1px, transparent 1px 54px),
+    repeating-linear-gradient(90deg, rgba(15,118,110,.045) 0 1px, transparent 1px 54px);
+}
+
+/* 动态光斑 */
+.login-bg-glow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.login-bg-glow::before,
+.login-bg-glow::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+}
+.login-bg-glow::before {
+  width: 540px;
+  height: 540px;
+  background: rgba(15,118,110,.18);
+  top: -140px;
+  left: -90px;
+  animation: login-glowA 16s ease-in-out infinite alternate;
+}
+.login-bg-glow::after {
+  width: 480px;
+  height: 480px;
+  background: rgba(47,111,237,.14);
+  bottom: -160px;
+  right: -70px;
+  animation: login-glowB 22s ease-in-out infinite alternate;
+}
+@keyframes login-glowA { from { transform: translate(0,0); } to { transform: translate(90px,56px); } }
+@keyframes login-glowB { from { transform: translate(0,0); } to { transform: translate(-76px,-44px); } }
+
+/* 雷达扫描 */
+.login-bg-radar {
+  position: absolute;
+  right: -160px;
+  top: 50%;
+  width: 560px;
+  height: 560px;
+  margin-top: -280px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(15,118,110,.10), transparent 72deg, transparent);
+  animation: login-radarSlow 16s linear infinite;
+}
+@keyframes login-radarSlow { to { transform: rotate(360deg); } }
+
+/* 内容层在背景之上 */
+.login-card-wrap {
+  position: relative;
+  z-index: 1;
+}

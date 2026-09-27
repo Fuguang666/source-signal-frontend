@@ -6,6 +6,7 @@ import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/store/auth';
 import { authApi } from '@/api';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import './Login.css';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ const LoginPage: React.FC = () => {
     try {
       await login(values.username, values.password);
       message.success(t('login.loginSuccess'));
-      navigate('/dashboard');
+      navigate('/app/dashboard');
     } catch {
       // 错误已在拦截器处理
     } finally {
@@ -32,7 +33,7 @@ const LoginPage: React.FC = () => {
     try {
       await authApi.register({ username: values.username, password: values.password, email: values.email });
       message.success(t('login.registerSuccess'));
-      navigate('/dashboard');
+      navigate('/app/dashboard');
     } catch {
       // 错误已在拦截器处理
     } finally {
@@ -50,18 +51,14 @@ const LoginPage: React.FC = () => {
         <LanguageSwitcher />
       </div>
 
-      {/* 背景装饰 */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: `
-          radial-gradient(circle at 20% 25%, rgba(15,118,110,.14), transparent 46%),
-          radial-gradient(circle at 82% 78%, rgba(47,111,237,.1), transparent 42%),
-          repeating-linear-gradient(0deg, rgba(15,118,110,.05) 0 1px, transparent 1px 56px),
-          repeating-linear-gradient(90deg, rgba(15,118,110,.05) 0 1px, transparent 1px 56px)
-        `,
-      }} />
+      {/* 动态背景（渐变网格 + 光斑 + 雷达扫描） */}
+      <div className="login-bg">
+        <div className="login-bg-grid" />
+        <div className="login-bg-glow" />
+        <div className="login-bg-radar" />
+      </div>
 
-      <div style={{
+      <div className="login-card-wrap" style={{
         position: 'relative', width: 'min(940px, 100%)', display: 'grid',
         gridTemplateColumns: '1.05fr 1fr', background: '#fff',
         border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden',

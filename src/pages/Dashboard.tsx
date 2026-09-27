@@ -33,7 +33,8 @@ const DashboardPage: React.FC = () => {
   }
 
   const aGradeCount = data.gradeDistribution?.find((g) => g.grade === 'A')?.count || 0;
-  const maxCat = Math.max(...(data.categoryDistribution?.map((c) => c.count) || [1]), 1);
+  const topCategories = (data.categoryDistribution || []).slice(0, 15);
+  const maxCat = Math.max(...(topCategories.map((c) => c.count) || [1]), 1);
   const recentLeads = data.recentLeads || [];
   const categories = data.monitoredCategories || [];
   const regions = data.monitoredRegions || [];
@@ -57,7 +58,7 @@ const DashboardPage: React.FC = () => {
             {data.isPaid ? t('dashboard.paidUnlockAll') : `${t('pricing.sampleLimit')} ${data.dailySampleLimit} ${t('dashboard.paidUnlockAll')}`}
           </div>
         </div>
-        <Button type="primary" onClick={() => navigate('/leads')} style={{ height: 38, padding: '0 20px', fontWeight: 600 }}>
+        <Button type="primary" onClick={() => navigate('/app/leads')} style={{ height: 38, padding: '0 20px', fontWeight: 600 }}>
           {t('dashboard.viewAll')}
         </Button>
       </div>
@@ -121,7 +122,7 @@ const DashboardPage: React.FC = () => {
         <div className="ss-card ss-card-pad">
           <div className="ss-card-title">{t('dashboard.categoryDistribution')}</div>
           <div className="ss-card-sub">{t('dashboard.categoryDistributionDesc')}</div>
-          {(data.categoryDistribution || []).map((item) => (
+          {topCategories.map((item) => (
             <div key={item.category} className="bar-row">
               <span className="lb">{item.category}</span>
               <div className="bar-track">
@@ -130,7 +131,7 @@ const DashboardPage: React.FC = () => {
               <span className="vl num">{item.count}</span>
             </div>
           ))}
-          {(data.categoryDistribution || []).length === 0 && (
+          {topCategories.length === 0 && (
             <div style={{ color: 'var(--text-3)', textAlign: 'center', padding: 20 }}>{t('dashboard.noData')}</div>
           )}
         </div>
@@ -142,7 +143,7 @@ const DashboardPage: React.FC = () => {
         <div className="timeline">
           {recentLeads.slice(0, 5).map((lead) => (
             <div key={lead.id} className={`tl-item ${lead.grade.toLowerCase()}`}>
-              <div className="tt" onClick={() => navigate(`/lead/${lead.id}`)}>
+              <div className="tt" onClick={() => navigate(`/app/lead/${lead.id}`)}>
                 {lead.title}
               </div>
               <div className="tm">

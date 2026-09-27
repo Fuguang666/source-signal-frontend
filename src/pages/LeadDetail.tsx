@@ -74,7 +74,7 @@ const LeadDetailPage: React.FC = () => {
       <div className="ss-card ss-card-pad" style={{ padding: 60, textAlign: 'center' }}>
         {t('leads.noData')}
         <br />
-        <Button type="primary" style={{ marginTop: 16 }} onClick={() => navigate('/leads')}>
+        <Button type="primary" style={{ marginTop: 16 }} onClick={() => navigate('/app/leads')}>
           {t('leadDetail.back')}
         </Button>
       </div>
@@ -85,7 +85,7 @@ const LeadDetailPage: React.FC = () => {
     <div>
       <div className="page-head">
         <div>
-          <button className="link-btn" style={{ fontSize: 12.5 }} onClick={() => navigate('/leads')}>
+          <button className="link-btn" style={{ fontSize: 12.5 }} onClick={() => navigate('/app/leads')}>
             ← {t('leadDetail.back')}
           </button>
           <h2 style={{ marginTop: 6 }}>{t('leads.title')}</h2>

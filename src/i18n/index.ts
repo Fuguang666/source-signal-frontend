@@ -3,7 +3,7 @@ import { initReactI18next } from 'react-i18next';
 import zh from './locales/zh';
 import en from './locales/en';
 
-const savedLang = localStorage.getItem('language') || 'zh';
+const savedLang = localStorage.getItem('language') || 'en';
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -11,7 +11,7 @@ i18n.use(initReactI18next).init({
     en: { translation: en },
   },
   lng: savedLang,
-  fallbackLng: 'zh',
+  fallbackLng: 'en',
   interpolation: { escapeValue: false },
 });
 

@@ -25,25 +25,25 @@ const AppLayout: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const NAV_ITEMS = [
-    { key: '/dashboard', label: t('layout.dashboard'), icon: 'dashboard' },
-    { key: '/leads', label: t('layout.leads'), icon: 'leads' },
-    { key: '/pricing', label: t('layout.pricing'), icon: 'pricing' },
-    { key: '/notify', label: t('layout.notify'), icon: 'notify' },
-    { key: '/settings', label: t('layout.settings'), icon: 'settings' },
+    { key: '/app/dashboard', label: t('layout.dashboard'), icon: 'dashboard' },
+    { key: '/app/leads', label: t('layout.leads'), icon: 'leads' },
+    { key: '/app/pricing', label: t('layout.pricing'), icon: 'pricing' },
+    { key: '/app/notify', label: t('layout.notify'), icon: 'notify' },
+    { key: '/app/settings', label: t('layout.settings'), icon: 'settings' },
   ];
 
   const PAGE_TITLES: Record<string, string> = {
-    '/dashboard': t('layout.dashboard'),
-    '/leads': t('layout.leads'),
-    '/lead': t('layout.leads'),
-    '/pricing': t('layout.pricing'),
-    '/notify': t('layout.notify'),
-    '/settings': t('layout.settings'),
+    '/app/dashboard': t('layout.dashboard'),
+    '/app/leads': t('layout.leads'),
+    '/app/lead': t('layout.leads'),
+    '/app/pricing': t('layout.pricing'),
+    '/app/notify': t('layout.notify'),
+    '/app/settings': t('layout.settings'),
   };
 
-  const currentPath = location.pathname.startsWith('/lead/') ? '/lead' : location.pathname;
+  const currentPath = location.pathname.startsWith('/app/lead/') ? '/app/lead' : location.pathname;
   const pageTitle = PAGE_TITLES[currentPath] || t('layout.dashboard');
-  const activeKey = currentPath === '/lead' ? '/leads' : currentPath;
+  const activeKey = currentPath === '/app/lead' ? '/app/leads' : currentPath;
 
   useEffect(() => {
     subscriptionApi.getSubscription().then((sub) => { setSubscription(sub); }).catch(() => {});
@@ -61,7 +61,7 @@ const AppLayout: React.FC = () => {
   };
 
   const userMenuItems = [
-    { key: 'profile', label: t('layout.profile'), onClick: () => navigate('/settings') },
+    { key: 'profile', label: t('layout.profile'), onClick: () => navigate('/app/settings') },
     { key: 'logout', label: t('layout.logout'), onClick: handleLogout, danger: true },
   ];
 
@@ -105,7 +105,7 @@ const AppLayout: React.FC = () => {
             <div style={{ height: 5, background: '#EDF1F6', borderRadius: 3, marginTop: 9, overflow: 'hidden' }}>
               <div style={{ display: 'block', height: '100%', background: 'var(--primary)', borderRadius: 3, width: `${trialUsedPercent}%` }} />
             </div>
-            <button onClick={() => navigate('/pricing')} style={{ marginTop: 10, width: '100%', padding: 7, fontSize: 12.5, background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>
+            <button onClick={() => navigate('/app/pricing')} style={{ marginTop: 10, width: '100%', padding: 7, fontSize: 12.5, background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>
               {isPaid ? t('pricing.renew') : t('pricing.upgrade')}
             </button>
           </div>
@@ -118,11 +118,11 @@ const AppLayout: React.FC = () => {
           <div style={{ flex: 1 }} />
           <div style={{ position: 'relative' }}>
             <svg style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, stroke: 'var(--text-3)', fill: 'none', strokeWidth: 2, strokeLinecap: 'round' }} viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-            <input type="text" placeholder={t('common.search') + '...'} onKeyDown={(e) => { if (e.key === 'Enter') navigate('/leads'); }} style={{ width: 240, padding: '8px 12px 8px 34px', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13, background: '#fff', fontFamily: 'inherit', color: 'var(--text)' }} />
+            <input type="text" placeholder={t('common.search') + '...'} onKeyDown={(e) => { if (e.key === 'Enter') navigate('/app/leads'); }} style={{ width: 240, padding: '8px 12px 8px 34px', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13, background: '#fff', fontFamily: 'inherit', color: 'var(--text)' }} />
           </div>
           <LanguageSwitcher size="small" />
           {!isPaid && (
-            <div onClick={() => navigate('/pricing')} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--s-soft)', color: 'var(--warn)', border: '1px solid #F4D9A8', borderRadius: 999, padding: '5px 12px', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
+            <div onClick={() => navigate('/app/pricing')} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--s-soft)', color: 'var(--warn)', border: '1px solid #F4D9A8', borderRadius: 999, padding: '5px 12px', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
               {t('pricing.trialDaysLeft')}: {trialDaysLeft} {t('common.days')}
             </div>
           )}
